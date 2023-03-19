@@ -1,0 +1,138 @@
+"""
+ALFABET:
+b, 0,1, c(zero skreslone), d(jedynka skreślona), _(symbol pusty)
+pozycja głowicy == poz
+"""
+
+
+def poz_check(p, array):
+    if p < 0:
+        raise AssertionError("(pozycja glowicy max w lewo)")
+    if p > len(array):
+        raise AssertionError("(pozycja glowicy max w prawo)")
+
+
+class StateMachine:
+
+    def __init__(self, states):
+        print(self.q0(states))
+
+    def q0(self, states):
+        poz = 0  # pozycja "startowa" głowicy
+        poz_check(poz, states)
+        print('q0', states)
+        if states[poz] == "b":  # maszyna natrafiła na symbol b
+            poz += 1  # następuje ruch głowicy w prawo
+            return self.q1(states[:], poz)  # zwracamy stan taśmy i położenie głowicy
+        elif states[poz] == "0":  # maszyna natrafiła na symbol 0
+            states[poz] = "c"  # maszyna podmienia na przekreślone zero
+            poz += 1  # następuje ruch głowicy w prawo
+            return self.q1(states[:], poz)  # zwracamy stan taśmy i położenie głowicy
+        elif states[poz] == "1":  # maszyna napotkała symbol 1
+            states[poz] = "d"  # maszyna podmienia symbol 1 na skreslona jedynke
+            poz += 1  # następuje ruch głowicy w prawo
+            return self.q1(states[:], poz)  # zwracamy stan taśmy i położenie głowicy
+        else:
+            raise AssertionError("Maszyna natrafiła na symbol nierozpoznawalny przez stan q0")
+
+    def q1(self, states,poz):
+        poz_check(poz, states)
+        print('q1', states, f'pozycja glowicy: {poz}', f'aktualnie przeptarowany znak: {states[poz]}')
+        if states[poz] == "c" or states[poz] == "d":  # maszyna natrafia na skreslona jedynke lub skreslone zero
+            poz += 1  # głowica wykonuje ruch w prawo
+            return self.q1(states, poz)  # maszyna zwraca stan tasmy i polozenie glowicy
+        elif states[poz] == "_":  # jesli maszyna natrafiła na symbol pusty
+            poz -= 1  # przesuwamy głowice w lewo
+            return "Maszyna natrafiła na stan akceptujący"
+        elif states[poz] == "0" or states[poz] == "1":  # jesli maszyna natrafila na 1 lub 0
+            poz -= 1  # w obu przypadkach głowica wykonuje ruch w lewo
+            return "Maszyna natrafiła na stan odrzucający"
+        else:
+            raise AssertionError("Maszyna natrafiła na symbol nierozpoznawalny przez stan q1")
+
+    def q2(self, states,poz):
+        poz_check(poz, states)
+        print('q2', states, f'pozycja glowicy: {poz}', f'aktualnie przeptarowany znak: {states[poz]}')
+        if states[poz] == "_":  # maszyna natrafiła na symbol pusty
+            poz -= 1  # przesuwamy głowice w lewo
+            return "Maszyna natrafiła na stan odrzucający"
+        elif states[poz] == "0" or states[poz] == "1":  # maszyna natrafiła na 0 lub 1:
+            poz += 1  # głowica przemieszcza sie w prawo w obu przypadkach
+            return self.q2(states, poz)  # zwracamy stan tasmy i polozenie glowicy
+        elif states[poz] == "b":  # maszyna natrafiła na symbol b
+            poz += 1  # przesuwamy głowice w prawo
+            return self.q2(states, poz)
+        else:
+            raise AssertionError("Maszyna natrafiła na symbol nierozpoznawalny przez stan q2")
+
+    def q3(self, states,poz):
+        poz_check(poz, states)
+        print('q3', states, f'pozycja glowicy: {poz}', f'aktualnie przeptarowany znak: {states[poz]}')
+        if states[poz] == "_":  # maszyna natrafiła na symbol pusty
+            poz += 1  # przesuwamy głowice w lewo
+            return "Maszyna natrafiła na stan odrzucający"
+        elif states[poz] == "0" or states[poz] == "1":  # maszyna natrfila na 1 lub 0
+            poz += 1  # w obu przypadkach ruch głowicy w prawo
+            return self.q3(states, poz)
+        elif states[poz] == "b":  # maszyna trafia na symbol b
+            poz += 1  # nastepuje ruch głowicy w prawo
+            return self.q3(states, poz)
+        else:
+            raise AssertionError("Maszyna natrafiła na symbol nierozpoznawalny przez stan q3")
+
+    def q4(self, states,poz):
+        poz_check(poz, states)
+        print('q4', states, f'pozycja glowicy: {poz}', f'aktualnie przeptarowany znak: {states[poz]}')
+        if states[poz] == "c" or states[poz] == "d":  # maszyna natrafiła na przekreslone 0 lub przekreslona 1
+            poz += 1  # następuje ruch głowicy w prawo
+            return self.q4(states, poz)
+        elif states[poz] == "_" or states[poz] == "1":  # maszyna natrafila na symbol pusty lub 1
+            poz += 1  # w obu przypadkach ruch głowicy w prawo
+            return "Maszyna natrafiła na stan odrzucający"
+        elif states[poz] == "0":  # maszyna natrafiła na 0
+            states[poz] = "c"  # podmieniamy na przekreślone zero
+            poz -= 1  # nastepuje ruch głowicy w lewo
+            return self.q4(states, poz)
+        else:
+            raise AssertionError("Maszyna natrafiła na symbol nierozpoznawalny przez stan q4")
+
+    def q5(self, states,poz):
+        poz_check(poz, states)
+        print('q5', states, f'pozycja glowicy: {poz}', f'aktualnie przeptarowany znak: {states[poz]}')
+        if states[poz] == "c" or states[poz] == "d":  # trafiamy na przekreslone 0 lub przekreslona q
+            poz += 1  # nastepuje ruch glowicy w prawo
+            return self.q5(states, poz)
+        elif states[poz] == "_" or states[poz] == "0":  # trafiamy na zero lub symbol pustyy
+            poz += 1  # nastepuje ruch glowicy w prawo
+            return "Maszyna natrafiła na stan odrzucający"
+        elif states[poz] == "1":  # maszyna natrafila na 1
+            states[poz] = "d"  # podmieniamy na przekreslona jedynke
+            poz -= 1  # głowica wykonuje ruch w lewo
+            return self.q5(states, poz)
+        else:
+            raise AssertionError("Maszyna natrafiła na symbol nierozpoznawalny przez stan q5")
+
+    def q6(self, states,poz):
+        poz_check(poz, states)
+        print('q6', states, f'pozycja glowicy: {poz}', f'aktualnie przeptarowany znak: {states[poz]}')
+        if states[poz] == "c" or states[poz] == "d":  # natrafiamy na przekreslone 0 lub przekreslona 1
+            poz -= 1
+            return self.q6(states, poz)
+        elif states[poz] == "b":#maszyna trafia na symbol b
+            poz -= 1  # nastepuje ruch glowicy w prawo
+            return self.q6(states, poz)
+        else:
+            raise AssertionError("Maszyna natrafiła na symbol nierozpoznawalny przez stan q6")
+    def q7(self,states,poz):
+        poz_check(poz, states)
+        print('q7', states, f'pozycja glowicy: {poz}', f'aktualnie przeptarowany znak: {states[poz]}')
+        if states[poz] == "0" or states[poz] == "1":#maszyna natrafia na 0 lub 1
+            poz -= 1 #ruch głowicy w lewo
+            return self.q7(states,poz)
+        elif states[poz] == "c" or states[poz] == "d":#maszyna natrafia na przekreslone 0 lub przekreslona 1
+            poz +=1#przesuniecie glowicy w prawo
+            return self.q7(states,poz)
+        else:
+            raise AssertionError("Maszyna natrafiła na symbol nierozpoznawalny przez stan q7")
+tasma = input("Wprowadź początkową konfiguracje taśmy:")
+StateMachine(list(tasma))
