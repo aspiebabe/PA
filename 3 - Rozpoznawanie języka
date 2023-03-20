@@ -1,0 +1,70 @@
+"""
+ALFABET:
+a, b, c
+model: (a*n)x(b*n)
+pozycja głowicy == poz
+"""
+
+
+
+def poz_check(p, array):
+    if p < 0:
+        raise AssertionError("(pozycja glowicy max w lewo)")
+    if p > len(array):
+        raise AssertionError("(pozycja glowicy max w prawo)")
+
+
+class StateMachine:
+
+    def __init__(self, states):
+        print(self.q0(states))
+
+    def q0(self, states):
+        poz = 0
+        b_count = 0
+        a_count = 0
+        poz_check(poz, states)
+        print('q0', states, f'pozycja glowicy: {poz}', f'aktualnie przeptarowany znak: {states[poz]}')
+        if states[poz] == 'a':
+            poz += 1
+            a_count +=1
+            return self.q1(states, poz, b_count, a_count)
+            return self.run(states,poz, b_count, a_count)
+        elif states[poz] == 'b' or states[poz] == 'x':
+            poz += 1
+            return "not accepted"
+        else:
+            raise AssertionError("Algorytm zapetla sie!")
+
+    def q1(self, states, poz, b_count, a_count):
+        poz_check(poz, states)
+        print('q1', states, f'pozycja glowicy: {poz}', f'aktualnie przeptarowany znak: {states[poz]}')
+        if states[poz] == 'a':
+            poz += 1
+            a_count += 1
+            return self.q1(states, poz, b_count, a_count)
+        elif states[poz] == 'x':
+            poz += 1
+            return self.q2(states, poz, b_count, a_count)
+        elif states[poz] == 'b':
+            return 'not accepted'
+        else:
+            raise AssertionError("Algorytm zapetla sie!")
+
+    def q2(self, states, poz, b_count, a_count):
+        while poz < len(states):
+            poz_check(poz, states)
+            print('q2', states, f'pozycja glowicy: {poz}', f'aktualnie przeptarowany znak: {states[poz]}')
+            if states[poz] == 'b':
+                    poz += 1
+                    b_count += 1
+                    return self.q2(states, poz, b_count, a_count)
+            else:
+                raise AssertionError("Algorytm zapetla sie!")
+        if a_count == b_count:
+            return "accepted"
+        else:
+            return "rejected"
+
+tasma = 'aaaaaxbbbbb'
+StateMachine(list(tasma))
