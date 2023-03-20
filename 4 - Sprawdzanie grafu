@@ -1,0 +1,138 @@
+def poz_check(p, array):
+    if p < 0:
+        raise AssertionError("(pozycja glowicy max w lewo)")
+    if p > len(array):
+        raise AssertionError("(pozycja glowicy max w prawo)")
+
+accepted =[]
+class GraphFHalf:
+
+    def __init__(self, states):
+        print(self.q0(states))
+    def q0(self,states):
+        poz = 0
+        a = 0
+        poz_check(poz, states)
+        print('q0', states, f'pozycja glowicy: {poz}', f'aktualnie przeptarowany znak: {states[poz]}')
+        if states[poz] == "[":
+            poz +=1
+            return self.q1(states, poz,a)
+        else:
+            return "Stan odrzucający"
+    def q1(self,states, poz,a):
+        poz_check(poz, states)
+        print('q1', states, f'pozycja glowicy: {poz}', f'aktualnie przeptarowany znak: {states[poz]}')
+        if states[poz] == "1" or states[poz] =="2" or states[poz]=="3" or states[poz]=="4" or states[poz]== "5"or states[poz]=="6" or states[poz]=="7" or states[poz]=="8" or states[poz]=="9":
+            poz +=1
+            return self.q1(states, poz,a)
+        elif states[poz] == "(":
+            poz +=1
+            return self.q1(states,poz,a)
+        elif states[poz] == ",":
+            poz +=1
+            return self.q1(states,poz,a)
+        elif states[poz] == ")":
+            poz +=1
+            return self.q2(states,poz,a)
+        else:
+            return "Stan odrzucający"
+
+    def q2(self, states, poz, a):
+        poz_check(poz, states)
+        print('q2', states, f'pozycja glowicy: {poz}', f'aktualnie przeptarowany znak: {states[poz]}')
+        if states[poz] == "#":
+            a +=1
+            accepted.append(a)
+            return "Stan akceptujący"
+        elif states[poz] == ",":
+            poz += 1
+            return self.q1(states, poz, a)
+        else:
+            return "Maszyna natrafiła na symbol którego nie rozpoznaje"
+
+class GraphSHalf:
+    def __init__(self, states):
+        print(self.q0(states))
+    def q0(self,states):
+        poz = 0
+        a = 0
+        poz_check(poz, states)
+        print('q0', states, f'pozycja glowicy: {poz}', f'aktualnie przeptarowany znak: {states[poz]}')
+        if states[poz] != "#":
+            poz +=1
+            return self.q01(states, poz,a)
+        elif states[poz] == "#":
+            poz +=1
+            return self.q1(states,poz,a)
+        else:
+            return "Maszyna natrafila na symbol którego nie rozpoznaje"
+
+    def q01(self, states,poz,a):
+        poz_check(poz, states)
+        print('q1', states, f'pozycja glowicy: {poz}', f'aktualnie przeptarowany znak: {states[poz]}')
+        if states[poz] != "#":
+            poz += 1
+            return self.q01(states, poz, a)
+        elif states[poz] == "#":
+            poz += 1
+            return self.q1(states, poz, a)
+        else:
+            return "Maszyna natrafila na symbol którego nie rozpoznaje"
+    def q1(self,states,poz,a):
+        poz_check(poz, states)
+        print('q1', states, f'pozycja glowicy: {poz}', f'aktualnie przeptarowany znak: {states[poz]}')
+        if states[poz] == "]":
+            poz +=1
+            return self.q2(states, poz, a)
+        elif states[poz] == states[poz] == "1" or states[poz] =="2" or states[poz]=="3" or states[poz]=="4" or states[poz]== "5"or states[poz]=="6" or states[poz]=="7" or states[poz]=="8" or states[poz]=="9":
+            poz += 1
+            return self.q4(states, poz, a)
+        else:
+            return "Maszyna natrafila na symbol którego nie rozpoznaje"
+    def q2(self,states,poz,a):
+        poz_check(poz, states)
+        print('q2', states, f'pozycja glowicy: {poz}', f'aktualnie przeptarowany znak: {states[poz]}')
+        if states[poz] == "_":
+            a +=1
+            accepted.append(a)
+            return "Stan akceptujący"
+        else:
+            return "Stan odrzucający"
+
+    def q4(self,states,poz,a):
+        poz_check(poz,states)
+        print('q4', states, f'pozycja glowicy: {poz}', f'aktualnie przeptarowany znak: {states[poz]}')
+        if states[poz]== ',':
+            poz +=1
+            return self.q4(states,poz,a)
+        elif states[poz] == '0' or states[poz] == "1" or states[poz] =="2" or states[poz]=="3" or states[poz]=="4" or states[poz]== "5"or states[poz]=="6" or states[poz]=="7" or states[poz]=="8" or states[poz]=="9":
+            poz +=1
+            return self.q4(states,poz,a)
+        elif states[poz] == "]":
+            poz +=1
+            return self.q2(states,poz,a)
+        else:
+            return "Stan odrzucający"
+    def q5(self,states,poz,a):
+        poz_check(poz, states)
+        print('q5', states, f'pozycja glowicy: {poz}', f'aktualnie przeptarowany znak: {states[poz]}')
+        if states[poz] == "1" or states[poz] =="2" or states[poz]=="3" or states[poz]=="4" or states[poz]== "5"or states[poz]=="6" or states[poz]=="7" or states[poz]=="8" or states[poz]=="9":
+            poz +=1
+            return self.q6(states,poz,a)
+        else:
+            return "Stan odrzucający"
+    def q6(self,states,poz,a):
+        poz_check(poz, states)
+        print('q6', states, f'pozycja glowicy: {poz}', f'aktualnie przeptarowany znak: {states[poz]}')
+        if states[poz] == '0' or states[poz] == "1" or states[poz] =="2" or states[poz]=="3" or states[poz]=="4" or states[poz]== "5"or states[poz]=="6" or states[poz]=="7" or states[poz]=="8" or states[poz]=="9":
+            poz +=1
+            return self.q6(states,poz,a)
+        elif states[poz] == ')':
+            poz +=1
+            return self.q1(states,poz,a)
+GraphFHalf("[(23,4),(7,1)#")
+GraphSHalf("[(23,4)#2,3,4,7,1]_")
+if len(accepted) == 2:
+    print("Układ nawiasów, cyfr i symboli jest poprawny")
+else:
+    print("Układ nie jest poprawny")
