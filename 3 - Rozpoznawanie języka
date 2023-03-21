@@ -1,18 +1,16 @@
-"""
+###ZADANIE 3
+#Dany jest język A ={axb: a,b e(E-x)*, |a| = |b|}
+#interpretacja
+#mamy dane słowo a i słowo b, oddzielone innym znakiem, nienależącym do alfabetu
+#w którym znajdują się znaki a i b
+#w tym języku słowa a i b muszą być tej samej długości, tj składać się z tej samej liczby znaków
+"""""
 ALFABET:
-a, b, c
+a, b, x
 model: (a*n)x(b*n)
+x-oddziela slowa a i b
 pozycja głowicy == poz
 """
-
-
-
-def poz_check(p, array):
-    if p < 0:
-        raise AssertionError("(pozycja glowicy max w lewo)")
-    if p > len(array):
-        raise AssertionError("(pozycja glowicy max w prawo)")
-
 
 class StateMachine:
 
@@ -21,50 +19,46 @@ class StateMachine:
 
     def q0(self, states):
         poz = 0
-        b_count = 0
-        a_count = 0
-        poz_check(poz, states)
+        b_count = 0#liczymy wystąpienia b
+        a_count = 0#liczymy wystapienia a
         print('q0', states, f'pozycja glowicy: {poz}', f'aktualnie przeptarowany znak: {states[poz]}')
-        if states[poz] == 'a':
-            poz += 1
+        if states[poz] == 'a':#trafilismy na a
+            poz += 1 #głowica w prawo
             a_count +=1
-            return self.q1(states, poz, b_count, a_count)
-            return self.run(states,poz, b_count, a_count)
-        elif states[poz] == 'b' or states[poz] == 'x':
-            poz += 1
-            return "not accepted"
+            return self.q1(states, poz, b_count, a_count) #zwracamy liczniki a i b, pozycje glowicy i stan tasmy
+        elif states[poz] == 'b' or states[poz] == 'x': #trafiamy na b lub x
+            poz += 1 #glowica w prawo
+            return "Stan odrzucajacy" #bo na razie musimy sprawdzic czy pierwszy symbol to a
         else:
-            raise AssertionError("Algorytm zapetla sie!")
+            raise AssertionError("Wprowadzono symbol nie należący do alfabetu maszyny")
 
     def q1(self, states, poz, b_count, a_count):
-        poz_check(poz, states)
         print('q1', states, f'pozycja glowicy: {poz}', f'aktualnie przeptarowany znak: {states[poz]}')
-        if states[poz] == 'a':
-            poz += 1
+        if states[poz] == 'a':#trafiamy na a,
+            poz += 1 #głowica w prawo
             a_count += 1
-            return self.q1(states, poz, b_count, a_count)
-        elif states[poz] == 'x':
-            poz += 1
+            return self.q1(states, poz, b_count, a_count)#moze wystapic wiecej niz jedno a, dlatego leci w pętli
+        elif states[poz] == 'x':#trafiamy na x
+            poz += 1 #jest szansa ze przed x bylo tylko jedno a, wiec przechodzimy do q2
             return self.q2(states, poz, b_count, a_count)
-        elif states[poz] == 'b':
-            return 'not accepted'
+        elif states[poz] == 'b':#b nadal nie akceptujemy - nie moze wystapic przed x
+            return 'Stan odrzucajacy'
         else:
-            raise AssertionError("Algorytm zapetla sie!")
+            raise AssertionError("Wprowadzono symbol nie należący do alfabetu maszyny")
 
     def q2(self, states, poz, b_count, a_count):
-        while poz < len(states):
-            poz_check(poz, states)
+        while poz < len(states):#dopóki nie dotrzemy do konca wprowadzonego ciagu znakow
             print('q2', states, f'pozycja glowicy: {poz}', f'aktualnie przeptarowany znak: {states[poz]}')
-            if states[poz] == 'b':
+            if states[poz] == 'b':  #tutaj w pętli może lecieć b,
                     poz += 1
-                    b_count += 1
+                    b_count += 1#sumujemy
                     return self.q2(states, poz, b_count, a_count)
             else:
-                raise AssertionError("Algorytm zapetla sie!")
-        if a_count == b_count:
-            return "accepted"
+                return "Stan odrzucajacy"#w tym momecie oczekujemy juz tylko b
+        if a_count == b_count:#warunkiem języka bylo to, żeby dlugosc wyrazu a byla rowna dlugosci wyrazu b, jesli tak jest, to maszyna rozpoznala jezyk
+            return "Maszyna rozpoznaje jezyk A"
         else:
-            return "rejected"
+            return "Maszyna nie rozpoznaje jezyka A"
 
 tasma = 'aaaaaxbbbbb'
 StateMachine(list(tasma))
