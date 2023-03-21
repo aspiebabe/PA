@@ -1,0 +1,40 @@
+###5
+import json #z racji ze maszyna turinga jest juz bardziej zlozona niz automat skonczony - korzystam z pliku typu json
+class Turnig:#definiuje klase maszyny
+
+    def __init__(self, obj):
+        self.states = obj['states']#definiuje stany jakie przyjmuje maszyna
+        self.epsilon = obj['epsilon']#jej alfabet
+        self.gamma = obj['gamma']#alfabet tasmy
+        self.sigma = obj['sigma']#funkcje przejsc
+
+    def run(self, tape):
+        tape = list(tape)
+        tape = [int(i) if i.isdigit() else i for i in tape]#tworze tasme w postaci listy, rezerwuje na niej pamiec
+
+        startpoint = 0 #poczatkowe polozenie glowicy
+        state = 'q0' #stan poczatkowy
+        while state != 'qr' and state != 'qa': #tworze petle zachodzaca dopoki nie napotkam stanu akceptujacego lub odrzucajacego
+            new_state, change, move = self.sigma[(state, tape[startpoint])]#trzem wartosciom z pliku tj. stanowi przejscia, wartosci dopisanej pod glowica i kierunkowi ruchu przyposuje zmienna klasy
+
+            tape[startpoint] = change
+            startpoint += -1 if move == 'L' else 1  #definiuje ruch tasmy zalezny od aktualnego polozenia i kierunku przesuniecia glowicy
+            state = new_state #stan do ktorego przeszlam zastepuje poprzedni
+
+            tape_s = self.sss(tape)
+            print("".join(tape_s[:startpoint]) + f'"{state}"' + "".join(tape_s[startpoint:]))#wizualizuje przejscie dla kazdego z symboli
+
+
+        return 'Stan akceptujacy' if state == 'qa' else 'Stan odrzucajacy' #finalnie zwracam wartosc "stan akceptujacy" lub "stan odrzucajacy"
+    def sss(self, list):
+        list = [str(i) for i in list]#konwertuje ciag znakow na liste znakow
+        return list
+
+
+with open('turing.json', 'r') as file: #z pliku pobieram informacje o maszynie korzystajac z par klucz-wartosc jsona
+    obj = json.load(file)
+    obj['sigma'] = {eval(key): value for key, value in obj['sigma'].items()}
+    print(obj['sigma'])
+
+t1 = Turnig(obj)
+print(t1.run('aaaxbbb_'))
