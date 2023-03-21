@@ -1,8 +1,19 @@
-def poz_check(p, array):
-    if p < 0:
-        raise AssertionError("(pozycja glowicy max w lewo)")
-    if p > len(array):
-        raise AssertionError("(pozycja glowicy max w prawo)")
+###Z4
+#Aby sprawdzić, czy układ nawiasów, przecinków i liczb jest prawidlowy rozbijam graf na dwie maszyny
+#pierwsza bada co dzieje sie do momentu spotkania symbolu #
+#druga bada co dzieje się później
+#istotne, aby w obu krokach uzyskac stany akceptujace, w tym celu tworze liste stanow akceptujacych, aby potem porownac jej dlugosc z iloscia maszyn zwracajacych stan
+#pseudokod działania 1 maszyny
+'''
+1. Sprawdzam czy na początku stoi [
+2. Jeśli tak - głowica idzie w prawo, przechodzimy do stanu q1, w przeciwnym przypadku odrzucamy
+3. Jesli kolejny symbol to ( - przesuwam glowice w prawo, w przeciwnym razie odrzucam
+4. Jeśli kolejnym symbolem jest cyfra 1-9 lub przecinek - przechodzę w prawo, w przeciwnym przypadku odrzucam
+5. Jeśli po , znajduje sie ) - przechodzimy w prawo do q4. Jeśli po przecinku znajduje się cyfra 1-9 - przechodzimy w prawo do  q5.
+6. W q4 - jesli po ) następuje # - akceptujemy, jesli po ) następuje , - wracamy do q1
+7. W q5 - jesli po cyfrze(cyfrach) nastepuje ) - przechodzimy do q4
+'''
+
 
 accepted =[]
 class GraphFHalf:
@@ -12,7 +23,6 @@ class GraphFHalf:
     def q0(self,states):
         poz = 0
         a = 0
-        poz_check(poz, states)
         print('q0', states, f'pozycja glowicy: {poz}', f'aktualnie przeptarowany znak: {states[poz]}')
         if states[poz] == "[":
             poz +=1
@@ -20,77 +30,103 @@ class GraphFHalf:
         else:
             return "Stan odrzucający"
     def q1(self,states, poz,a):
-        poz_check(poz, states)
         print('q1', states, f'pozycja glowicy: {poz}', f'aktualnie przeptarowany znak: {states[poz]}')
-        if states[poz] == "1" or states[poz] =="2" or states[poz]=="3" or states[poz]=="4" or states[poz]== "5"or states[poz]=="6" or states[poz]=="7" or states[poz]=="8" or states[poz]=="9":
-            poz +=1
-            return self.q1(states, poz,a)
-        elif states[poz] == "(":
-            poz +=1
-            return self.q1(states,poz,a)
-        elif states[poz] == ",":
-            poz +=1
-            return self.q1(states,poz,a)
-        elif states[poz] == ")":
+        if states[poz] == "(":
             poz +=1
             return self.q2(states,poz,a)
         else:
             return "Stan odrzucający"
 
     def q2(self, states, poz, a):
-        poz_check(poz, states)
         print('q2', states, f'pozycja glowicy: {poz}', f'aktualnie przeptarowany znak: {states[poz]}')
+        if states[poz] == "1" or states[poz] =="2" or states[poz]=="3" or states[poz]=="4" or states[poz]== "5"or states[poz]=="6" or states[poz]=="7" or states[poz]=="8" or states[poz]=="9":
+            poz +=1
+            return self.q2(states, poz,a)
+        elif states[poz] == ',':
+            poz +1
+            return self.q3(states,poz,a)
+        else:
+            return "Stan odrzuacjący"
+    def q3(self, states, poz, a):
+        print('q3', states, f'pozycja glowicy: {poz}', f'aktualnie przeptarowany znak: {states[poz]}')
+        if states[poz] == ")":
+            poz +=1
+            return self.q4(states, poz,a)
+        elif states[poz] == ',':
+            poz +=1
+            return self.q5(states,poz,a)
+        else:
+            return "Stan odrzuacjący"
+
+    def q4(self, states, poz, a):
+        print('q4', states, f'pozycja glowicy: {poz}', f'aktualnie przeptarowany znak: {states[poz]}')
         if states[poz] == "#":
             a +=1
             accepted.append(a)
-            return "Stan akceptujący"
+            return "Stan akceptujacy"
         elif states[poz] == ",":
-            poz += 1
-            return self.q1(states, poz, a)
+            poz+=1
+            return self.q1(states,poz,a)
         else:
-            return "Maszyna natrafiła na symbol którego nie rozpoznaje"
+            return "Stan odrzucający"
+    def q5(self, states, poz, a):
+        print('q5', states, f'pozycja glowicy: {poz}', f'aktualnie przeptarowany znak: {states[poz]}')
+        if states[poz] == "1" or states[poz] =="2" or states[poz]=="3" or states[poz]=="4" or states[poz]== "5"or states[poz]=="6" or states[poz]=="7" or states[poz]=="8" or states[poz]=="9":
+            poz +=1
+            return self.q5(states, poz,a)
+        if states[poz] == ")":
+            poz +=1
+            return self.q4(states,poz,a)
 
+#pseudokod działania 2 maszyny
+''' 1.Głowica wraca do położenia początkowego
+    2. Przechodzimy w prawo tak długo, aż nie napotkamy symbolu #, jeśli na niego trafimy - następuje ruch w prawo
+    2a. Pomocniczo utworzyłam q1  do którego przechodzi maszyna, gdy pierwszy napotkany symbol nie jest # - głównie po to, że stan q0 definiuje
+    położenie głowicy, więc odsyłanie do niego kolejnych wierzchołków generowałoby błąd. W q1 mamy okreslone juz polozenie głowicy, wiec mozemy
+    uzywac go do pętli.
+    3. Jesli nastepny napotkany symbol to ] - wykonujemy ruch w prawo i przechodzimy do q3; jesli symbolem jest cyfra 1-9 - ruch w prawo - do q4
+    4. jesli nastepny symbol to _ - akceptujemy, w przeciwnym wypadku odrzucamy
+    5. jeśli następnym symbolem jest , - ruch glowicy w prawo, jesli następnym symbolem jest ] - przechodzimy do pkt 4.
+    6. Jesli następnym symbolem jest liczba 1-9 -> przechodzimy do pkt. 5,  w przeciwnym przypadku odrzucamy
+
+'''
 class GraphSHalf:
     def __init__(self, states):
         print(self.q0(states))
     def q0(self,states):
         poz = 0
         a = 0
-        poz_check(poz, states)
         print('q0', states, f'pozycja glowicy: {poz}', f'aktualnie przeptarowany znak: {states[poz]}')
         if states[poz] != "#":
             poz +=1
-            return self.q01(states, poz,a)
+            return self.q1(states, poz,a)
         elif states[poz] == "#":
             poz +=1
-            return self.q1(states,poz,a)
+            return self.q2(states,poz,a)
         else:
             return "Maszyna natrafila na symbol którego nie rozpoznaje"
 
-    def q01(self, states,poz,a):
-        poz_check(poz, states)
+    def q1(self, states,poz,a):
         print('q1', states, f'pozycja glowicy: {poz}', f'aktualnie przeptarowany znak: {states[poz]}')
         if states[poz] != "#":
             poz += 1
-            return self.q01(states, poz, a)
+            return self.q1(states, poz, a)
         elif states[poz] == "#":
             poz += 1
-            return self.q1(states, poz, a)
+            return self.q2(states, poz, a)
         else:
             return "Maszyna natrafila na symbol którego nie rozpoznaje"
-    def q1(self,states,poz,a):
-        poz_check(poz, states)
+    def q2(self,states,poz,a):
         print('q1', states, f'pozycja glowicy: {poz}', f'aktualnie przeptarowany znak: {states[poz]}')
         if states[poz] == "]":
             poz +=1
-            return self.q2(states, poz, a)
+            return self.q3(states, poz, a)
         elif states[poz] == states[poz] == "1" or states[poz] =="2" or states[poz]=="3" or states[poz]=="4" or states[poz]== "5"or states[poz]=="6" or states[poz]=="7" or states[poz]=="8" or states[poz]=="9":
             poz += 1
             return self.q4(states, poz, a)
         else:
             return "Maszyna natrafila na symbol którego nie rozpoznaje"
-    def q2(self,states,poz,a):
-        poz_check(poz, states)
+    def q3(self,states,poz,a):
         print('q2', states, f'pozycja glowicy: {poz}', f'aktualnie przeptarowany znak: {states[poz]}')
         if states[poz] == "_":
             a +=1
@@ -100,39 +136,29 @@ class GraphSHalf:
             return "Stan odrzucający"
 
     def q4(self,states,poz,a):
-        poz_check(poz,states)
         print('q4', states, f'pozycja glowicy: {poz}', f'aktualnie przeptarowany znak: {states[poz]}')
         if states[poz]== ',':
             poz +=1
-            return self.q4(states,poz,a)
-        elif states[poz] == '0' or states[poz] == "1" or states[poz] =="2" or states[poz]=="3" or states[poz]=="4" or states[poz]== "5"or states[poz]=="6" or states[poz]=="7" or states[poz]=="8" or states[poz]=="9":
-            poz +=1
-            return self.q4(states,poz,a)
+            return self.q5(states,poz,a)
         elif states[poz] == "]":
             poz +=1
-            return self.q2(states,poz,a)
+            return self.q3(states,poz,a)
         else:
             return "Stan odrzucający"
-    def q5(self,states,poz,a):
-        poz_check(poz, states)
-        print('q5', states, f'pozycja glowicy: {poz}', f'aktualnie przeptarowany znak: {states[poz]}')
-        if states[poz] == "1" or states[poz] =="2" or states[poz]=="3" or states[poz]=="4" or states[poz]== "5"or states[poz]=="6" or states[poz]=="7" or states[poz]=="8" or states[poz]=="9":
-            poz +=1
-            return self.q6(states,poz,a)
+
+    def q5(self, states, poz, a):
+        print('q4', states, f'pozycja glowicy: {poz}', f'aktualnie przeptarowany znak: {states[poz]}')
+        if states[poz] == "1" or states[poz] == "2" or states[poz] == "3" or states[poz] == "4" or states[poz] == "5" or states[poz] == "6" or states[poz] == "7" or states[poz] == "8" or states[poz] == "9":
+            poz += 1
+            return self.q4(states, poz, a)
         else:
             return "Stan odrzucający"
-    def q6(self,states,poz,a):
-        poz_check(poz, states)
-        print('q6', states, f'pozycja glowicy: {poz}', f'aktualnie przeptarowany znak: {states[poz]}')
-        if states[poz] == '0' or states[poz] == "1" or states[poz] =="2" or states[poz]=="3" or states[poz]=="4" or states[poz]== "5"or states[poz]=="6" or states[poz]=="7" or states[poz]=="8" or states[poz]=="9":
-            poz +=1
-            return self.q6(states,poz,a)
-        elif states[poz] == ')':
-            poz +=1
-            return self.q1(states,poz,a)
+
+
 GraphFHalf("[(23,4),(7,1)#")
 GraphSHalf("[(23,4)#2,3,4,7,1]_")
-if len(accepted) == 2:
+num_of_machines = 2
+if len(accepted) == num_of_machines: #jesli liczba stanow akceptujacych na liscie jest równa ilosci maszyn - układ uznaje za poprawny
     print("Układ nawiasów, cyfr i symboli jest poprawny")
 else:
     print("Układ nie jest poprawny")
